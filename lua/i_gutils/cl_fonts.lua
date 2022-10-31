@@ -30,11 +30,7 @@ function getFont(...)
     return fonts[key] or makeFont(args, key)
 end
 
--- returns width and height of the text with the given font ( or already set font )
---[[
-    1 = text
-    2 = font
-]]
+-- returns width and height of the text with the given font (So you only need use 1 function)
 function getTextSize(font, text)
     surface.SetFont(font)
     return surface.GetTextSize(text)
