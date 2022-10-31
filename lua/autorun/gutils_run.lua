@@ -6,7 +6,7 @@
     This means you could place numbers at the start of your file names to ensure run order.
 ]]
 
--- [[
+--[[
     TODO: do some sorting to ensure sh files run before sv and cl
     For now bo_ is used as it has the desired effect without any sorting.
 ]]
