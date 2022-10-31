@@ -30,7 +30,7 @@ function getFont(...)
     return fonts[key] or makeFont(args, key)
 end
 
--- returns size of the text with the given font ( or already set font )
+-- returns width and height of the text with the given font ( or already set font )
 --[[
     1 = text
     2 = font
