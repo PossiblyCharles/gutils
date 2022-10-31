@@ -10,7 +10,7 @@
     TODO: do some sorting to ensure sh files run before sv and cl
     For now bo_ is used as it has the desired effect without any sorting.
 ]]
-local function includeFiles(dir)
+local function includeLuaDir(dir)
     local files, directories = file.Find(dir.."*", "LUA")
 
     for i=1, #files do
@@ -39,21 +39,17 @@ local function includeFiles(dir)
 
     for i=1, #directories do
         local fil = directories[i]
-        runFiles(dir..fil.."/")
+        includeLuaDir(dir..fil.."/")
     end
-end
-
-function includeLuaDir(dir)
-    print(dir.." loading.")
-    includeFiles(dir.."/")
-    print(dir.." loaded.")
 end
 
 local _, directories = file.Find("*", "LUA")
 for i=1, #directories do
     local dir = directories[i]
     if string.StartWith(dir, "i_") then
+        print(dir.." loading.")
         includeLuaDir(dir)
+        print(dir.." loaded.")
     end
 end
 
