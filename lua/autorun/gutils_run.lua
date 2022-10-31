@@ -51,7 +51,7 @@ end
 
 local _, directories = file.Find("*", "LUA")
 for i=1, #directories do
-    local dir = directories[1]
+    local dir = directories[i]
     if string.StartWith(dir, "i_") then
         includeLuaDir(dir)
     end
