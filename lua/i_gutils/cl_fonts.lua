@@ -14,12 +14,13 @@ local function makeFont(args, key)
 end
 
 -- returns font name for use
+-- result should be kept in a local var where possible.
 --[[
     1 = size
     2 = weight
     3 = font
 ]]
-function getFont(...)
+function gutils.getFont(...)
     local args = {...}
 
     args[1] = args[1] or 18
@@ -31,7 +32,7 @@ function getFont(...)
 end
 
 -- returns width and height of the text with the given font (So you only need use 1 function)
-function getTextSize(font, text)
+function gutils.getTextSize(font, text)
     surface.SetFont(font)
     return surface.GetTextSize(text)
 end
