@@ -48,7 +48,7 @@ for i=1, #directories do
     local dir = directories[i]
     if string.StartWith(dir, "i_") then
         print(dir.." loading.")
-        includeLuaDir(dir)
+        includeLuaDir(dir.."/")
         print(dir.." loaded.")
     end
 end
