@@ -30,7 +30,7 @@ end
 -- Note: Make sure to set inUse back to false when no longer in use.
 local function getUnusedRT()
     for i=1, #renderTargets do
-        if !renderTargets[i].inUse then
+        if renderTargets[i].inUse ~= true then
             renderTargets[i].inUse = true
             return renderTargets[i]
         end
