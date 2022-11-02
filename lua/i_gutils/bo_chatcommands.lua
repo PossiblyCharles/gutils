@@ -2,7 +2,6 @@
 local prefixes = {
     ["/"] = true,
     ["!"] = true,
-    ["\\"] = true 
 }
 
 local commands = {

@@ -38,12 +38,16 @@ local function getUnusedRT()
     return addRenderTarget()
 end
 
-function gutils.drawMaterial(drawFunc, ...)
+-- Used to render a drawFunc into a material for better fps.
+-- Returns a new function and a callback table.
+-- redraw material by setting callback[1] to true, drawFunc is callback[2] (initial drawFunc by default)
+function gutils.drawPaintRT(drawFunc, ...)
     local rt = getUnusedRT()
     
     local args = {...}
+
     if args[1] ~= -1 then -- Don't do this unless you
-        rt.maxInactive = args[1] or 60
+        rt.maxInactive = args[2] or 60
         rt.inactiveStamp = SysTime() + rt.maxInactive
         table.insert(renderTargetsInUse, renderTargets[renderTargetCount])
     end
@@ -55,12 +59,22 @@ function gutils.drawMaterial(drawFunc, ...)
     cam.End2D()
     render.PopRenderTarget()
 
+    local changeCallback = {false, drawFunc}
     return function()
+        if changeCallback[1] then
+            render.PushRenderTarget( rt.rt )
+            cam.Start2D()
+                render.Clear( 0, 0, 0, 0 )
+                changeCallback[2]()
+            cam.End2D()
+            render.PopRenderTarget()
+            changeCallback[1] = false
+        end
         rt.inactiveStamp = SysTime() + rt.maxInactive
         surface.SetDrawColor(color_white)
         surface.SetMaterial(rt.mat)
         surface.DrawTexturedRect(0, 0, 3440, 3440)
-    end
+    end, changeCallback
 end
 
 hook.Add("Think","gutils_drawPaintRT",function()
