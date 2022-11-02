@@ -42,34 +42,41 @@ end
 -- Returns a new function and a redraw function.
 -- defaultDrawFunc starts as the original drawFunc
 -- redraw(drawFunc = defaultDrawFunc, replaceDefaultBool=nil)
-function gutils.drawPaintRT(drawFunc, ...)
+function gutils.drawPaintRT(...)
     local rt = getUnusedRT()
     
     local args = {...}
+    local drawFunc = args[1]
+    local maxInactive = args[2]
 
-    if args[1] ~= -1 then -- Don't do this unless you
-        rt.maxInactive = args[2] or 60
+    if maxInactive ~= -1 then -- Don't do this unless you
+        rt.maxInactive = maxInactive or 60
         rt.inactiveStamp = SysTime() + rt.maxInactive
         table.insert(renderTargetsInUse, renderTargets[renderTargetCount])
     end
 
-    render.PushRenderTarget( rt.rt )
-	cam.Start2D()
-	    render.Clear( 0, 0, 0, 0 )
-        drawFunc()
-    cam.End2D()
-    render.PopRenderTarget()
+    if drawFunc then
+        render.PushRenderTarget( rt.rt )
+        cam.Start2D()
+            render.Clear( 0, 0, 0, 0 )
+            drawFunc()
+        cam.End2D()
+        render.PopRenderTarget()
+    else
+        drawFunc = function() end
+    end
 
+    -- args[2] = true makes args[1] the new default drawFunc
     local reDraw = function(...)
         local args = {...}
-        args[1] = args[1] or drawFunc
+        local thisDraw = args[1] or drawFunc
         if args[2] then
-            drawFunc = args[1]
+            drawFunc = thisDraw
         end
         render.PushRenderTarget( rt.rt )
         cam.Start2D()
             render.Clear( 0, 0, 0, 0 )
-            args[1]()
+            thisDraw()
         cam.End2D()
         render.PopRenderTarget()
     end
