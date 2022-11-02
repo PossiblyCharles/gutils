@@ -39,8 +39,9 @@ local function getUnusedRT()
 end
 
 -- Used to render a drawFunc into a material for better fps.
--- Returns a new function and a callback table.
--- redraw material by setting callback[1] to true, drawFunc is callback[2] (initial drawFunc by default)
+-- Returns a new function and a redraw function.
+-- defaultDrawFunc starts as the original drawFunc
+-- redraw(drawFunc = defaultDrawFunc, replaceDefaultBool=nil)
 function gutils.drawPaintRT(drawFunc, ...)
     local rt = getUnusedRT()
     
@@ -59,22 +60,26 @@ function gutils.drawPaintRT(drawFunc, ...)
     cam.End2D()
     render.PopRenderTarget()
 
-    local changeCallback = {false, drawFunc}
-    return function()
-        if changeCallback[1] then
-            render.PushRenderTarget( rt.rt )
-            cam.Start2D()
-                render.Clear( 0, 0, 0, 0 )
-                changeCallback[2]()
-            cam.End2D()
-            render.PopRenderTarget()
-            changeCallback[1] = false
+    local reDraw = function(...)
+        local args = {...}
+        args[1] = args[1] or drawFunc
+        if args[2] then
+            drawFunc = args[1]
         end
+        render.PushRenderTarget( rt.rt )
+        cam.Start2D()
+            render.Clear( 0, 0, 0, 0 )
+            args[1]()
+        cam.End2D()
+        render.PopRenderTarget()
+    end
+
+    return function()
         rt.inactiveStamp = SysTime() + rt.maxInactive
         surface.SetDrawColor(color_white)
         surface.SetMaterial(rt.mat)
         surface.DrawTexturedRect(0, 0, 3440, 3440)
-    end, changeCallback
+    end, reDraw
 end
 
 hook.Add("Think","gutils_drawPaintRT",function()
