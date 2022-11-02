@@ -16,7 +16,7 @@ A short form replacement for surface.SetFont + surface.GetTextSize.
 ```lua
 gutils.addCommand({"table","of","trigger","commands"}, function(ply, ...) ply:Kill() end)
 ```
-Used to add commands in a short way. Can be added on client, server or both. Add a third param as true to disable the concommand creation.
+Used to add chat/console commands in a short way. Can be added on client, server or both. Add a third param as true to disable the concommand creation.
 
 ```lua
 gutils.removeCommand({"table","of","trigger","commands"})
