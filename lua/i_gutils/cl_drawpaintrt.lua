@@ -92,7 +92,7 @@ end
 hook.Add("Think","gutils_drawPaintRT",function()
     local i = 1
     while true do
-        if #renderTargetsInUse <= i then
+        if #renderTargetsInUse < i then
             return
         end
         if renderTargetsInUse[i].inactiveStamp < SysTime() then
