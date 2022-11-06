@@ -2,16 +2,27 @@
     includes any lua folder starting with i_ at the start
 
     Files are included in ascending alphanumerical order
-    sv_/cl_/bo_ can be anywhere in the file name.
+    sv_/cl_/sh_ can be anywhere in the file name.
     This means you could place numbers at the start of your file names to ensure run order.
 ]]
 
---[[
-    TODO: do some sorting to ensure sh files run before sv and cl
-    For now bo_ is used as it has the desired effect without any sorting.
-]]
 local function includeLuaDir(dir)
     local files, directories = file.Find(dir.."*", "LUA")
+
+    local i = 1
+    while #files >= i do
+        local fil = files[i]
+        if string.find(fil, "sh_") then
+            print(full)
+            include(full)
+            if SERVER then
+                AddCSLuaFile(full)
+            end
+            table.remove(files, i)
+        else
+            i = i + 1
+        end
+    end
 
     for i=1, #files do
         local fil = files[i]
@@ -27,12 +38,6 @@ local function includeLuaDir(dir)
             else
                 print(full)
                 include(full)
-            end
-        elseif string.find(fil, "bo_") then -- Using bo short for 'both' to ensure shared files run before client files due to ascending order
-            print(full)
-            include(full)
-            if SERVER then
-                AddCSLuaFile(full)
             end
         end
     end
