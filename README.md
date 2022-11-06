@@ -2,6 +2,10 @@
 This addon is for things that tend to be remade from addon to addon with the same functionality.
 I'm going to be adding to this every time I make something that could be utilised by multiple addons.
 
+# Running lua folders
+As long as your addons lua file directory name is started with i_ gutils will handle including of any cl_ sh_ and sv_ files within that directory.
+Check out [gutils_run.lua](https://github.com/PossiblyCharles/gutils/blob/main/lua/autorun/gutils_run.lua)
+
 # Functions
 ```lua
 local fontName = gutils.getFont(size=18, weight=500, baseFont="Roboto")
