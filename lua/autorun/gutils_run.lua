@@ -13,6 +13,7 @@ local function includeLuaDir(dir)
     while #files >= i do
         local fil = files[i]
         if string.find(fil, "sh_") then
+            local full = dir..fil
             print(full)
             include(full)
             if SERVER then
