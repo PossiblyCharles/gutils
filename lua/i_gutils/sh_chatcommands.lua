@@ -6,10 +6,16 @@ local prefixes = {
 
 local commands = {
     --[[
-    ["example"] = function(ply, ...)
-        ply:SetHealth(ply:Health()+1)
-        return ":O"
-    end,
+    ["example"] = {
+        {
+            0 = 1, -- index 0 being the cooldown for the command
+            [steamid] = nextAllowedTime,
+        },
+        function(ply, ...)
+            ply:SetHealth(ply:Health()+1)
+            return ":O"
+        end,
+    },
     ]]
 }
 
@@ -18,7 +24,17 @@ hook.Add(SERVER and "PlayerSay" or "OnPlayerChat", "gutils_commands", function( 
         local split = string.Explode(" ", string.lower(string.sub(text,2)))
         local cmd = commands[split[1]]
         if cmd then
-            return cmd(ply, unpack(split, 2))
+            if cmd[1] ~= nil then
+                local time = (cmd[1][ply:SteamID()] and cmd[1][ply:SteamID()] or 0)
+                if time > CurTime() then
+                    local remaining = math.ceil(time-CurTime())
+                    gutils.chatAddText(ply, Color(100,200,255), "That command's still on cooldown. Wait another ", Color(255,255,255), tostring(remaining), Color(100,200,255), remaining > 1 and " seconds." or " second.")
+                    return ""
+                else
+                    cmd[1][ply:SteamID()] = CurTime()+cmd[1][0]
+                end
+            end
+            return cmd[2](ply, unpack(split, 2))
         end
     end
 end)
@@ -28,6 +44,7 @@ Params
 [1] is a table of lower case strings that trigger the function
 [2] must be a func with ...
 [3] true to disable concommand creation
+[4] cooldown in seconds
 
 Usage: 
     (Clientside menu opening)
@@ -57,20 +74,29 @@ function gutils.addCommand(...)
     local strTable = args[1]
     local func = args[2]
     local noConcommand = args[3]
+    local cooldown = args[4] and {[0] = args[4]} or nil
 
     print("gutils command added: ")
     PrintTable(strTable)
+    local cmd = {cooldown, func}
 
     if noConcommand then
         for i=1, #strTable do
-            commands[strTable[i]] = func
+            commands[strTable[i]] = cmd
         end
     else
-        local concommandFunc = function(ply, cmd, args)
-            func(ply, unpack(args))
+        local concommandFunc = function(ply, cmda, args)
+            if cmd[1] ~= nil then
+                if (cmd[1][ply:SteamID()] and cmd[1][ply:SteamID()] or 0) > CurTime() then
+                    return
+                else
+                    cmd[1][ply:SteamID()] = CurTime()+cmd[1][0]
+                end
+            end
+            cmd[2](ply, unpack(args))
         end
         for i=1, #strTable do
-            commands[strTable[i]] = func
+            commands[strTable[i]] = cmd
             concommand.Add(strTable[i], concommandFunc)
         end
     end
@@ -89,4 +115,4 @@ function gutils.removeCommand(strTable)
             concommand.Remove(strTable[i])
         end
     end
-end 
+end

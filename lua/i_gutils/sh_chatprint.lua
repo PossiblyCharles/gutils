@@ -9,6 +9,10 @@ if SERVER then
         net.Send(plys)
     end
 else
+    function gutils.chatAddText(plys, ...)
+        chat.PlaySound()
+        chat.AddText(...)
+    end
     net.Receive("gutils_chatAddtext", function(len)
         chat.PlaySound()
         chat.AddText(unpack(util.JSONToTable(util.Decompress(net.ReadData(net.ReadUInt(16))))))

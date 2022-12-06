@@ -1,7 +1,10 @@
+-- TODO: Redo this... Realising this is pretty trash. A rewrite is in order.
+
 local renderTargets = {}
 local renderTargetCount = 0
 local renderTargetsInUse = {}
 
+-- TODO: setup a way to deal with setting size.
 local function addRenderTarget()
     renderTargetCount = renderTargetCount + 1
     local uniqueName = "drawPaintRT"..renderTargetCount
