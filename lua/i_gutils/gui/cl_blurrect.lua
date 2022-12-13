@@ -1,9 +1,8 @@
 local blur = Material( "pp/blurscreen" )
-function gutils.blurRect(x, y, w, h, a, ...)
+function gutils.blurRect(x, y, w, h, a, i)
     surface.SetDrawColor( 255, 255, 255, a)
     surface.SetMaterial( blur )
-    local args = {...}
-    for i = 1, args[1] or 5 do
+    for i = 1, i or 5 do
         blur:SetFloat( "$blur", ( i / 4 ) * 4 )
         blur:Recompute()
 
