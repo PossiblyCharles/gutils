@@ -69,12 +69,8 @@ Usage:
 adds the commands for the realm(SERVER/CLIENT) called on
 console command created by default.
 ]]
-function gutils.addCommand(...)
-    local args = {...}
-    local strTable = args[1]
-    local func = args[2]
-    local noConcommand = args[3]
-    local cooldown = args[4] and {[0] = args[4]} or nil
+function gutils.addCommand(strTable, func, noConcommand, cooldown)
+    local cooldown = cooldown and {[0] = cooldown} or nil
 
     print("gutils command added: ")
     PrintTable(strTable)
