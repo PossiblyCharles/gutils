@@ -7,16 +7,20 @@ local modelMeshs = {
 local ignoredModels = error_replacement.ignoredModels
 
 hook.Add("OnEntityCreated", "error_replacement", function(ent)
-	timer.Simple(0.2, function()
+	timer.Simple(0, function()
         if !IsValid(ent) then return end
         local model = ent:GetModel()
-        if model ~= nil and modelMeshs[model] == nil and ignoredModels[model] ~= true then
+        if model ~= nil and string.sub(model, -4) == ".mdl" and modelMeshs[model] == nil and ignoredModels[model] ~= true then
             local phys = ent:GetPhysicsObject()
             if IsValid(phys) then
-                local dataString = util.Compress(util.TableToJSON(phys:GetMesh())) -- TODO: handle nil
+                local tbl = phys:GetMesh()
+                for k,v in ipairs(tbl) do
+                    v.normal = vector_up
+                end
+                local dataString = util.Compress(util.TableToJSON({tbl, model})) -- TODO: GetMesh can be nil :/
                 modelMeshs[model] = {dataString, #dataString}
+                print("Model mesh compressed: "..model)
             end
-            ent:SetNWString("intendedModel", model)
         end
     end)
 end)
@@ -32,13 +36,13 @@ net.Receive("error_replacement", function(len, ply)
     if (playerCooldowns[ply:SteamID()] or 0) > CurTime() then return end
     playerCooldowns[ply:SteamID()] = CurTime() + netMessageInterval
 
-    net.Start("error_replacement_accepted") -- Only sent on success to help reduce resource cost of net spammers.
-    net.Send(ply) -- Client needs to try again after a while if they don't get this message.
-
     local requestedModel = net.ReadString()
     if modelMeshs[requestedModel] then
+        print(ply:SteamID().." requested "..requestedModel)
         table.insert(requests, {ply, requestedModel})
         count = count + 1
+        net.Start("error_replacement_accepted") -- Only sent on success to help reduce resource cost of net spammers.
+        net.Send(ply) -- Client needs to try again after a while if they don't get this message.
     end
 end)
 
