@@ -11,16 +11,14 @@ hook.Add("OnEntityCreated", "error_replacement", function(ent)
         if !IsValid(ent) then return end
         local model = ent:GetModel()
         if model ~= nil and string.sub(model, -4) == ".mdl" and modelMeshs[model] == nil and ignoredModels[model] ~= true then
-            local phys = ent:GetPhysicsObject()
-            if IsValid(phys) then
-                local tbl = phys:GetMesh()
-                for k,v in ipairs(tbl) do
-                    v.normal = vector_up
-                end
-                local dataString = util.Compress(util.TableToJSON({tbl, model})) -- TODO: GetMesh can be nil :/
-                modelMeshs[model] = {dataString, #dataString}
-                print("Model mesh compressed: "..model)
+            local tbl = util.GetModelMeshes(ent:GetModel())
+            local meshTbl = {}
+            for k,v in ipairs(tbl) do
+                table.Add(meshTbl, v.triangles)
             end
+            local dataString = util.Compress(util.TableToJSON({meshTbl, model}))
+            modelMeshs[model] = {dataString, #dataString} -- TODO: Need to split the data into 65,533 byte chunks for networking.
+            print("Model mesh compressed("..#dataString.."): "..model)
         end
     end)
 end)

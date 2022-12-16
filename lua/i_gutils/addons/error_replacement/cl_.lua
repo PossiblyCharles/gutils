@@ -1,5 +1,5 @@
 local waitingForAccept = false
-local modelMeshs = {}
+modelMeshs = {}
 local mat = Material("models/debug/debugwhite")
 
 local netMessageInterval = error_replacement.netMessageInterval
@@ -20,14 +20,15 @@ end)
 
 net.Receive("error_replacement", function(len)
     local tbl = util.JSONToTable(util.Decompress(net.ReadData(len)))
-    local modelMesh = Mesh(mat)
-    modelMesh:BuildFromTriangles(tbl[1])
-    modelMeshs[tbl[2]] = modelMesh
+    modelMeshs[tbl[2]] = {}
+    
+    table.insert(modelMeshs[tbl[2]], tbl[1])
+    
     print("Model received: "..tbl[2])
 end)
 
 hook.Add("OnEntityCreated", "error_replacement", function(ent)
-    timer.Simple(0,function()
+    timer.Simple(1,function()
         if IsValid(ent) and ent:GetModel() and !util.GetModelMeshes(ent:GetModel()) then
             local model = ent:GetModel()
             if string.sub(model, -4) == ".mdl"  then
@@ -37,7 +38,16 @@ hook.Add("OnEntityCreated", "error_replacement", function(ent)
                     count = count + 1
                     print("Requesting "..model)
                 end
-                table.insert(entsMissingModel, {ent, model})
+                local cent = ents.CreateClientside( "error_replacement" )
+                cent:SetPos(ent:GetPos())
+                cent:SetMoveType( MOVETYPE_NONE )
+                cent:SetParent(ent)
+                --cent:SetModel("models/Combine_Helicopter/helicopter_bomb01.mdl")
+                cent.model = model
+                cent:Spawn()
+                ent.cent = cent
+                ent:CallOnRemove("error_replacement",function(ent) ent.cent:Remove() end)
+                --table.insert(entsMissingModel, {ent, model, cent})
             end
         end
     end)
@@ -62,6 +72,7 @@ hook.Add("Think", "error_replacement", function() -- Might change this to send 2
     end)
 end)
 
+/*
 -- Looping all ents is gonna eat frames... :)
 -- Need to make a table of all ents needing mesh's drawn.
 hook.Add("PostDrawOpaqueRenderables", "error_replacement", function(depth, skybox, skybox3d)
@@ -77,7 +88,6 @@ hook.Add("PostDrawOpaqueRenderables", "error_replacement", function(depth, skybo
             end
             continue
         end
-        render.ResetModelLighting(1, 1, 1, 1)
         render.SetMaterial(mat)
         surface.SetDrawColor(255, 255, 255, 255)
         cam.PushModelMatrix(tbl[1]:GetWorldTransformMatrix())
@@ -85,3 +95,4 @@ hook.Add("PostDrawOpaqueRenderables", "error_replacement", function(depth, skybo
         cam.PopModelMatrix() -- Lighting is being fucky...
     end
 end)
+*/
