@@ -7,7 +7,7 @@ ENT.Spawnable = true
 
 function ENT:Initialize()
     if SERVER then
-        self:SetModel( "models/Combine_Helicopter/helicopter_bomb01.mdl" )
+        self:SetModel( "models/props_junk/PopCan01a.mdl" )
     else
         self:CreateMesh()
     end

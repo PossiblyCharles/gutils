@@ -17,8 +17,14 @@ hook.Add("OnEntityCreated", "error_replacement", function(ent)
                 table.Add(meshTbl, v.triangles)
             end
             local dataString = util.Compress(util.TableToJSON({meshTbl, model}))
-            modelMeshs[model] = {dataString, #dataString} -- TODO: Need to split the data into 65,533 byte chunks for networking.
-            print("Model mesh compressed("..#dataString.."): "..model)
+            local count = math.ceil(#dataString/8000)
+            local dataTable = {}
+            for i=1, count, 1 do
+                dataTable[i] = string.sub(dataString, 1, 8000)
+                dataString = string.sub(dataString, 8001)
+            end
+            modelMeshs[model] = dataTable -- TODO: Need to split the data into 65,533 byte chunks for networking.
+            print("Model mesh compressed("..count.."): "..model)
         end
     end)
 end)
@@ -50,10 +56,17 @@ hook.Add("Think", "error_replacement", function() -- Might change this to send 2
     lastTime = CurTime() + netMessageInterval
 
     local request = requests[1]
-    local model = modelMeshs[request[2]]
+    local dataTables = modelMeshs[request[2]]
     table.remove(requests, 1)
     count = count - 1
-    net.Start("error_replacement")
-        net.WriteData(model[1], model[2])
-    net.Send(request[1])
+    print(#dataTables)
+    for i=1, #dataTables, 1 do
+        timer.Simple(i*0.1,function()
+            net.Start("error_replacement")
+                net.WriteUInt(#dataTables[i], 13)
+                net.WriteData(dataTables[i], #dataTables[i])
+                net.WriteBool((#dataTables == i))
+            net.Send(request[1])
+        end)
+    end
 end)

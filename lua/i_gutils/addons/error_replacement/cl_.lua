@@ -18,13 +18,21 @@ net.Receive("error_replacement_accepted", function(len)
     print("Model request accepted")
 end)
 
+local dataHolder = ""
 net.Receive("error_replacement", function(len)
-    local tbl = util.JSONToTable(util.Decompress(net.ReadData(len)))
-    modelMeshs[tbl[2]] = {}
-    
-    table.insert(modelMeshs[tbl[2]], tbl[1])
-    
-    print("Model received: "..tbl[2])
+    dataHolder = dataHolder .. net.ReadData(net.ReadUInt(13))
+    local last = net.ReadBool()
+    print(last)
+    if last then
+        local tbl = util.JSONToTable(util.Decompress(dataHolder))
+        dataHolder = ""
+
+        modelMeshs[tbl[2]] = {}
+        table.insert(modelMeshs[tbl[2]], tbl[1])
+        print("Model received: "..tbl[2])
+    else
+        print("Some model data received")
+    end
 end)
 
 hook.Add("OnEntityCreated", "error_replacement", function(ent)
@@ -42,7 +50,7 @@ hook.Add("OnEntityCreated", "error_replacement", function(ent)
                 cent:SetPos(ent:GetPos())
                 cent:SetMoveType( MOVETYPE_NONE )
                 cent:SetParent(ent)
-                --cent:SetModel("models/Combine_Helicopter/helicopter_bomb01.mdl")
+                cent:SetModel("models/props_junk/PopCan01a.mdl")
                 cent.model = model
                 cent:Spawn()
                 ent.cent = cent
